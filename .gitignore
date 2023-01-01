@@ -1,0 +1,6 @@
+build/
+source/util
+temp/
+tmp/
+*.o
+*.output
