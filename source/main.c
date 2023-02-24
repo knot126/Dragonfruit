@@ -22,9 +22,6 @@ int main(int argc, char *argv[]) {
 	const char *password = DgArgGetValue2(&args, "p", "password");
 	bool decrypt = DgArgGetFlag(&args, "d");
 	
-	DgLog(DG_LOG_INFO, "Input file: %s", file_in);
-	DgLog(DG_LOG_INFO, "Output file: %s", file_out);
-	
 	DgObfuscateAlgorithm algorithm_id;
 	
 	if (DgStringEqual(algorithm, "rot13")) {
@@ -43,9 +40,29 @@ int main(int argc, char *argv[]) {
 		algorithm_id = DG_OBFUSCATE_SEA1;
 	}
 	else {
+		DgLog(DG_LOG_INFO, "Usage:");
+		DgLog(DG_LOG_INFO, "dragonfruit -a <algorithm> [-d] [-p <password>] [-i <input>] [-o <output>]");
+		DgLog(DG_LOG_INFO, "");
+		DgLog(DG_LOG_INFO, "    -a <algorithm>         Controls the algorithm encrypt with.");
+		DgLog(DG_LOG_INFO, "    -d                     Decrypt for ciphers with differing encrypt and decrypt functions.");
+		DgLog(DG_LOG_INFO, "    -p <password>          Password or key used for encryption.");
+		DgLog(DG_LOG_INFO, "    -i <input>             Input file path.");
+		DgLog(DG_LOG_INFO, "    -o <output>            Output file path.");
+		DgLog(DG_LOG_INFO, "");
+		DgLog(DG_LOG_INFO, "Available encryption algorithms:");
+		DgLog(DG_LOG_INFO, "    rot13: The ROT13 shift chipher (latin chars only)");
+		DgLog(DG_LOG_INFO, "    cesar: A moboalphabetic cipher");
+		DgLog(DG_LOG_INFO, "    poly: The standard polyalphabetic cipher");
+		DgLog(DG_LOG_INFO, "    mediocre: Weak encryption algorithm used in games by Mediocre AB");
+		DgLog(DG_LOG_INFO, "    sea1: A weak stream cipher based on XORShift");
+		DgLog(DG_LOG_INFO, "");
+		
 		DgLog(DG_LOG_ERROR, "You did not specify any algorithm!");
 		return 1;
 	}
+	
+	DgLog(DG_LOG_INFO, "Input file: %s", file_in);
+	DgLog(DG_LOG_INFO, "Output file: %s", file_out);
 	
 	// Load the file
 	DgError status;
