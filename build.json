@@ -8,7 +8,7 @@
 		"folders": ["source"],
 		"includes": ["source"],
 		"links": ["m", "pthread"],
-		"defines": ["DG_NO_LUA", "DG_NO_SDL"],
+		"defines": ["DG_NO_LUA", "DG_NO_SDL", "DG_MELON_OBFUSCATE_EXTRA", "DG_MELON_RANDOM_EXTRA"],
 		"output": "temp/dragonfruit"
 	},
 	"windows-arm64": {
@@ -19,8 +19,8 @@
 		"compiler": "C:/Users/User/bin/llvm-mingw-20220323-ucrt-aarch64/llvm-mingw-20220323-ucrt-aarch64/bin/clang.exe",
 		"folders": ["source"],
 		"includes": ["source"],
-		"links": [],
-		"defines": ["DG_NO_LUA", "DG_NO_SDL"],
+		"links": ["Ws2_32"],
+		"defines": ["DG_NO_LUA", "DG_NO_SDL", "DG_MELON_OBFUSCATE_EXTRA", "DG_MELON_RANDOM_EXTRA"],
 		"output": "temp/dragonfruit.exe"
 	}
 }
