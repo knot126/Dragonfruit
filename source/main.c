@@ -39,6 +39,9 @@ int main(int argc, char *argv[]) {
 	else if (DgStringEqual(algorithm, "sea1")) {
 		algorithm_id = DG_OBFUSCATE_SEA1;
 	}
+	else if (DgStringEqual(algorithm, "sea2")) {
+		algorithm_id = DG_OBFUSCATE_SEA2;
+	}
 	else {
 		DgLog(DG_LOG_INFO, "Usage:");
 		DgLog(DG_LOG_INFO, "dragonfruit -a <algorithm> [-d] [-p <password>] [-i <input>] [-o <output>]");
@@ -55,6 +58,7 @@ int main(int argc, char *argv[]) {
 		DgLog(DG_LOG_INFO, "    poly: The standard polyalphabetic cipher");
 		DgLog(DG_LOG_INFO, "    mediocre: Weak encryption algorithm used in games by Mediocre AB");
 		DgLog(DG_LOG_INFO, "    sea1: A weak stream cipher based on XORShift");
+		DgLog(DG_LOG_INFO, "    sea2: Knot's 2nd Stupid Encryption Algorithm");
 		DgLog(DG_LOG_INFO, "");
 		
 		DgLog(DG_LOG_ERROR, "You did not specify any algorithm!");
