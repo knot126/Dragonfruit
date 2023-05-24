@@ -4,9 +4,12 @@
 #include "util/storage_filesystem.h"
 #include "util/file.h"
 #include "util/args.h"
+#include "util/time.h"
 
 int main(int argc, char *argv[]) {
 	DgLog(DG_LOG_INFO, "Dragonfruit v0.0.1");
+	
+	DgInitTime();
 	
 	DgStorageAddPool(NULL, DgFilesystemCreatePool("file", "."));
 	
@@ -21,6 +24,7 @@ int main(int argc, char *argv[]) {
 	const char *algorithm = DgArgGetValue2(&args, "a", "none");
 	const char *password = DgArgGetValue2(&args, "p", "password");
 	bool decrypt = DgArgGetFlag(&args, "d");
+	bool time_test = DgArgGetFlag(&args, "t");
 	
 	DgObfuscateAlgorithm algorithm_id;
 	
@@ -82,11 +86,19 @@ int main(int argc, char *argv[]) {
 	
 	DgLog(DG_LOG_INFO, "Loaded file...");
 	
+	double time = DgTime();
+	
 	if (!decrypt) {
 		DgObfuscateData(algorithm_id, password, length, data);
 	}
 	else {
 		DgDeobfuscateData(algorithm_id, password, length, data);
+	}
+	
+	time = DgTime() - time;
+	
+	if (time_test) {
+		DgLog(DG_LOG_INFO, "Took %gms to encrypt 0x%x byte message", time * 1000.0f, length);
 	}
 	
 	DgLog(DG_LOG_INFO, "Data transformed...");
