@@ -1,5 +1,6 @@
 {
 	"linux": {
+		"title": "Linux (clang, native)",
 		"prebuild": [
 			"rm -r ./source/util",
 			"cp -r ../Melon/src ./source/util"
@@ -7,32 +8,34 @@
 		"compiler": "clang",
 		"folders": ["source"],
 		"includes": ["source"],
-		"links": ["m", "pthread"],
-		"defines": ["DG_NO_LUA", "DG_NO_SDL", "DG_MELON_OBFUSCATE_EXTRA", "DG_MELON_RANDOM_EXTRA"],
-		"output": "temp/dragonfruit"
+		"links": ["m", "pthread", "SDL2"],
+		"defines": ["DG_NO_LUA"],
+		"output": "temp/melon-test-linux-native.elf"
 	},
-	"windows-arm64": {
+	"windows-clang": {
+		"title": "Windows (clang, native bare)",
 		"prebuild": [
-			"rd source\\util /s /q",
-			"xcopy ..\\Melon\\src source\\util /e /i"
+			"rd .\\source\\util /s /q",
+			"xcopy ..\\Melon\\src .\\source\\util /e /i"
 		],
-		"compiler": "..\\llvm-mingw-20230320-ucrt-aarch64\\bin\\aarch64-w64-mingw32-clang.exe",
+		"compiler": "clang",
 		"folders": ["source"],
 		"includes": ["source"],
-		"links": ["Ws2_32"],
-		"defines": ["DG_NO_LUA", "DG_NO_SDL", "DG_MELON_OBFUSCATE_EXTRA", "DG_MELON_RANDOM_EXTRA"],
-		"output": "temp/dragonfruit.exe"
+		"links": ["user32", "gdi32", "Ws2_32", "bcrypt"],
+		"defines": ["DG_NO_LUA", "DG_NO_SDL", "DG_USE_WINDOWS_API", "DG_MELON_OBFUSCATE_EXTRA", "MELON_CRYPTOGRAPHY_RANDOM"],
+		"output": "temp/dragonfruit-native.exe"
 	},
-	"windows-x86_64-cross-arm64": {
+	"windows-clang-noposix": {
+		"title": "Windows (clang, native bare)",
 		"prebuild": [
-			"rd source\\util /s /q",
-			"xcopy ..\\Melon\\src source\\util /e /i"
+			"rd .\\source\\util /s /q",
+			"xcopy ..\\Melon\\src .\\source\\util /e /i"
 		],
-		"compiler": "..\\llvm-mingw-20230320-ucrt-aarch64\\bin\\x86_64-w64-mingw32-clang.exe",
+		"compiler": "clang",
 		"folders": ["source"],
 		"includes": ["source"],
-		"links": ["Ws2_32"],
-		"defines": ["DG_NO_LUA", "DG_NO_SDL", "DG_MELON_OBFUSCATE_EXTRA", "DG_MELON_RANDOM_EXTRA"],
-		"output": "temp/dragonfruit-x86_64.exe"
+		"links": ["user32", "gdi32", "Ws2_32", "bcrypt"],
+		"defines": ["DG_NO_LUA", "DG_NO_SDL", "DG_USE_WINDOWS_API", "DG_MELON_OBFUSCATE_EXTRA", "MELON_CRYPTOGRAPHY_RANDOM", "MELON_NO_POSIX"],
+		"output": "temp/dragonfruit-native.exe"
 	}
 }
