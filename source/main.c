@@ -1,13 +1,11 @@
-#include "util/log.h"
-#include "util/obfuscate.h"
-#include "util/string.h"
+#include "util/melon.h"
 #include "util/storage_filesystem.h"
-#include "util/file.h"
-#include "util/args.h"
-#include "util/time.h"
+
+int DrObfuscateMain(DgArgs *args);
+int DrHashMain(DgArgs *args);
 
 int main(int argc, char *argv[]) {
-	DgLog(DG_LOG_INFO, "Dragonfruit v0.0.1");
+	DgLog(DG_LOG_INFO, "Dragonfruit v0.0.2");
 	
 	DgInitTime();
 	
@@ -19,44 +17,34 @@ int main(int argc, char *argv[]) {
 	
 	DgArgPrint(&args);
 	
-	const char *file_in = DgArgGetValue2(&args, "i", "file://input.dat");
-	const char *file_out = DgArgGetValue2(&args, "o", "file://output.dat");
-	const char *algorithm = DgArgGetValue2(&args, "a", "none");
-	const char *password = DgArgGetValue2(&args, "p", "password");
-	bool decrypt = DgArgGetFlag(&args, "d");
-	bool time_test = DgArgGetFlag(&args, "t");
+	const char *mode = DgArgGetValue2(&args, "m", "help");
 	
-	DgObfuscateAlgorithm algorithm_id;
-	
-	if (DgStringEqual(algorithm, "rot13")) {
-		algorithm_id = DG_OBFUSCATE_ROT13;
+	if (DgStringEqual(mode, "obfuscate")) {
+		return DrObfuscateMain(&args);
 	}
-	else if (DgStringEqual(algorithm, "cesar")) {
-		algorithm_id = DG_OBFUSCATE_CESAR;
+	else if (DgStringEqual(mode, "hash")) {
+		return DrHashMain(&args);
 	}
-	else if (DgStringEqual(algorithm, "poly")) {
-		algorithm_id = DG_OBFUSCATE_POLYALPHABETIC;
-	}
-	else if (DgStringEqual(algorithm, "mediocre")) {
-		algorithm_id = DG_OBFUSCATE_MEDIOCRE;
-	}
-	else if (DgStringEqual(algorithm, "sea1")) {
-		algorithm_id = DG_OBFUSCATE_SEA1;
-	}
-	else if (DgStringEqual(algorithm, "sea2")) {
-		algorithm_id = DG_OBFUSCATE_SEA2;
-	}
-	else {
+	else if (DgStringEqual(mode, "help")) {
 		DgLog(DG_LOG_INFO, "Usage:");
-		DgLog(DG_LOG_INFO, "dragonfruit -a <algorithm> [-d] [-p <password>] [-i <input>] [-o <output>]");
+		DgLog(DG_LOG_INFO, "%s -m <mode> [parameters ...]", argv[0]);
 		DgLog(DG_LOG_INFO, "");
+		DgLog(DG_LOG_INFO, "Generic parameters:");
+		DgLog(DG_LOG_INFO, "    -m <mode>              What type of action to preform.");
+		DgLog(DG_LOG_INFO, "");
+		DgLog(DG_LOG_INFO, "OBFUSCATE MODE");
+		DgLog(DG_LOG_INFO, "");
+		DgLog(DG_LOG_INFO, "Obfuscate mode parameters:");
 		DgLog(DG_LOG_INFO, "    -a <algorithm>         Controls the algorithm encrypt with.");
 		DgLog(DG_LOG_INFO, "    -d                     Decrypt for ciphers with differing encrypt and decrypt functions.");
 		DgLog(DG_LOG_INFO, "    -p <password>          Password or key used for encryption.");
 		DgLog(DG_LOG_INFO, "    -i <input>             Input file path.");
 		DgLog(DG_LOG_INFO, "    -o <output>            Output file path.");
 		DgLog(DG_LOG_INFO, "");
-		DgLog(DG_LOG_INFO, "Available encryption algorithms:");
+		DgLog(DG_LOG_INFO, "Obfuscate mode usage:");
+		DgLog(DG_LOG_INFO, "%s -m obfuscate -a <algorithm> [-d] [-p <password>] [-i <input>] [-o <output>]", argv[0]);
+		DgLog(DG_LOG_INFO, "");
+		DgLog(DG_LOG_INFO, "Obfuscate mode algorithms:");
 		DgLog(DG_LOG_INFO, "    rot13: The ROT13 shift chipher (latin chars only)");
 		DgLog(DG_LOG_INFO, "    cesar: A moboalphabetic cipher");
 		DgLog(DG_LOG_INFO, "    poly: The standard polyalphabetic cipher");
@@ -64,55 +52,26 @@ int main(int argc, char *argv[]) {
 		DgLog(DG_LOG_INFO, "    sea1: A weak stream cipher based on XORShift");
 		DgLog(DG_LOG_INFO, "    sea2: Knot's 2nd Stupid Encryption Algorithm");
 		DgLog(DG_LOG_INFO, "");
-		
-		DgLog(DG_LOG_ERROR, "You did not specify any algorithm!");
+		DgLog(DG_LOG_INFO, "HASH MODE");
+		DgLog(DG_LOG_INFO, "");
+		DgLog(DG_LOG_INFO, "Hash mode parameters:");
+		DgLog(DG_LOG_INFO, "    -a <algorithm>         Set the hash algorithm to use.");
+		DgLog(DG_LOG_INFO, "    -i <input>             Input file to hash.");
+		DgLog(DG_LOG_INFO, "");
+		DgLog(DG_LOG_INFO, "Hash mode usage:");
+		DgLog(DG_LOG_INFO, "%s -m hash -a <algorithm> [-i <input>]", argv[0]);
+		DgLog(DG_LOG_INFO, "");
+		DgLog(DG_LOG_INFO, "Obfuscate mode algorithms:");
+		DgLog(DG_LOG_INFO, "    cubehash256-old: The old variant of CubeHash-256");
+		DgLog(DG_LOG_INFO, "    cubehash384-old: The old variant of CubeHash-384");
+		DgLog(DG_LOG_INFO, "    cubehash512-old: The old variant of CubeHash-512");
+		DgLog(DG_LOG_INFO, "    melon-ch160: 160-bit fast output version of CubeHash in Melon");
 		return 1;
-	}
-	
-	DgLog(DG_LOG_INFO, "Input file: %s", file_in);
-	DgLog(DG_LOG_INFO, "Output file: %s", file_out);
-	
-	// Load the file
-	DgError status;
-	size_t length;
-	void *data;
-	
-	status = DgFileLoad(NULL, file_in, &length, &data);
-	
-	if (status) {
-		DgLog(DG_LOG_FATAL, "Failed to load input file!");
-		return 1;
-	}
-	
-	DgLog(DG_LOG_INFO, "Loaded file...");
-	
-	double time = DgTime();
-	
-	if (!decrypt) {
-		DgObfuscateData(algorithm_id, password, length, data);
 	}
 	else {
-		DgDeobfuscateData(algorithm_id, password, length, data);
-	}
-	
-	time = DgTime() - time;
-	
-	if (time_test) {
-		DgLog(DG_LOG_INFO, "Took %gms to encrypt 0x%x byte message", time * 1000.0f, length);
-	}
-	
-	DgLog(DG_LOG_INFO, "Data transformed...");
-	
-	status = DgFileSave(NULL, file_out, length, data);
-	
-	if (status) {
-		DgLog(DG_LOG_FATAL, "Failed to save output file! (status = 0x%x)", status);
+		DgLog(DG_LOG_ERROR, "Invalid mode");
 		return 1;
 	}
-	
-	DgLog(DG_LOG_INFO, "Saved file...");
-	
-	DgArgFree(&args);
 	
 	return 0;
 }
